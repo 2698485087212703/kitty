@@ -5,6 +5,7 @@ import sys
 import time
 import urllib
 import requests
+import argparse
 from bs4 import BeautifulSoup
 from pdb import set_trace as bp
 
@@ -58,8 +59,16 @@ DOWNLOAD_INTERVAL = 1
 RETRY_INTERVAL = 10
 
 def main():
-    keywords = sys.argv[1]
-    next_link_index = 1
+    parser = argparse.ArgumentParser(prog='kitty')
+    parser.add_argument('-a', '--all', action='store_true', \
+                        help='下载全部分页')
+    parser.add_argument('-p', '--page', \
+                        help='指定分页')
+    parser.add_argument('keywords', help='关键词')
+    args = parser.parse_args()
+
+    keywords = args.keywords
+    next_link_index = args.page and args.page or 1
     while True and next_link_index > 0:
 
         idx = 1
@@ -74,6 +83,8 @@ def main():
 
                 print >> sys.stderr, "第%d页，共%d条记录" % \
                     (previous_next_link_index, len(results))
+                if not args.all:
+                    sys.exit()
 
                 if next_link_index < previous_next_link_index:
                     print >> sys.stderr, "任务完成"
